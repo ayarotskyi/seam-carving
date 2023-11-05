@@ -12,7 +12,12 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("./static/")))
 	http.HandleFunc("/hello", L.Hello_handler)
 
-	err := http.ListenAndServe(":4000", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "4000"
+	}
+
+	err := http.ListenAndServe(":"+port, nil)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {
