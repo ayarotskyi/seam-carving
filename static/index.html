@@ -35,23 +35,10 @@
               >
                 Drag and drop an image
               </div>
+              <p id="image-size"></p>
             </div>
             <div class="p-6 mt-4">
               <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label
-                    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    for="height"
-                    >Height</label
-                  ><input
-                    type="number"
-                    class="flex h-10 border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full p-2 border rounded-md"
-                    id="height"
-                    name="height"
-                    min="0"
-                    required
-                  />
-                </div>
                 <div>
                   <label
                     class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -62,6 +49,20 @@
                     class="flex h-10 border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full p-2 border rounded-md"
                     id="width"
                     name="width"
+                    min="0"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    for="height"
+                    >Height</label
+                  ><input
+                    type="number"
+                    class="flex h-10 border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full p-2 border rounded-md"
+                    id="height"
+                    name="height"
                     min="0"
                     required
                   />
@@ -96,7 +97,7 @@
                 <img
                   src="/placeholder.svg"
                   alt="Transformed Image"
-                  class="aspect-square object-cover w-full h-full rounded-lg overflow-hidden dark:border-gray-800"
+                  class="w-full"
                   id="preview"
                 />
               </div>

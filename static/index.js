@@ -55,6 +55,14 @@ window.addEventListener("load", () => {
     }
 
     img = document.createElement("img");
+    img.onload = function () {
+      document
+        .getElementById("image-size")
+        .replaceChildren(
+          "Image size: " + this.naturalWidth + "x" + this.naturalHeight
+        );
+      // alert(this.naturalWidth + "x" + this.naturalHeight);
+    };
     if (FileReader) {
       var fr = new FileReader();
       fr.onload = function () {
