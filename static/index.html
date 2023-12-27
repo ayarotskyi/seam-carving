@@ -1,12 +1,109 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8">
-	<title>SeamCarving</title>
-	<link rel="stylesheet" href="./main.css">
-	<script src="./index.js"></script>
-</head>
-<body>
-	<h1>Hello from a static page</h1>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./index.js"></script>
+  </head>
+  <body>
+    <iframe name="dummyframe" id="dummyframe" style="display: none"></iframe>
+    <form
+      action="/image"
+      enctype="multipart/form-data"
+      target="dummyframe"
+      method="post"
+    >
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="w-full">
+          <div
+            class="rounded-lg border bg-card text-card-foreground shadow-sm p-6"
+            data-v0-t="card"
+          >
+            <div class="flex flex-col space-y-1.5 p-6 pb-4">
+              <h3 class="text-2xl font-semibold leading-none tracking-tight">
+                Upload Image
+              </h3>
+              <p class="text-sm text-muted-foreground">
+                Drag and drop the image you want to upload
+              </p>
+            </div>
+            <div class="p-6">
+              <div
+                class="border-dashed border-4 border-gray-500 rounded-lg min-h-60 flex items-center justify-center"
+                id="dropbox"
+              >
+                Drag and drop an image
+              </div>
+            </div>
+            <div class="p-6 mt-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    for="height"
+                    >Height</label
+                  ><input
+                    type="number"
+                    class="flex h-10 border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full p-2 border rounded-md"
+                    id="height"
+                    name="height"
+                    min="0"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    for="width"
+                    >Width</label
+                  ><input
+                    type="number"
+                    class="flex h-10 border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full p-2 border rounded-md"
+                    id="width"
+                    name="width"
+                    min="0"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-4 justify-center mt-6">
+            <button
+              type="submit"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2"
+            >
+              Apply Transformation
+            </button>
+          </div>
+        </div>
+        <div class="w-full">
+          <div
+            class="rounded-lg border bg-card text-card-foreground shadow-sm p-6"
+            data-v0-t="card"
+          >
+            <div class="flex flex-col space-y-1.5 p-6 pb-4">
+              <h3 class="text-2xl font-semibold leading-none tracking-tight">
+                Preview
+              </h3>
+              <p class="text-sm text-muted-foreground">
+                View the final result of your image transformation here
+              </p>
+            </div>
+            <div class="p-6">
+              <div class="w-full min-h-60 rounded-lg overflow-hidden">
+                <img
+                  src="/placeholder.svg"
+                  alt="Transformed Image"
+                  class="aspect-square object-cover w-full h-full rounded-lg overflow-hidden dark:border-gray-800"
+                  id="preview"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </body>
 </html>

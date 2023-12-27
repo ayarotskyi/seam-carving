@@ -42,7 +42,7 @@ func Image_handler(w http.ResponseWriter, r *http.Request) {
 		maxSteps = 1
 	}
 
-	horizontalDynamic := getDynamicPrepResult(energies, maxSteps)
+	horizontalDynamic := getHorizontalDynamicPrepResult(energies, maxSteps)
 
 	for i := 0; i < img.Bounds().Dy()-height; i++ {
 		seam := getHorizontalSeam(horizontalDynamic, maxSteps)
@@ -64,6 +64,32 @@ func Image_handler(w http.ResponseWriter, r *http.Request) {
 					left++
 				}
 				right++
+			}
+		}
+	}
+
+	verticalDynamic := getVerticalDynamicPrepResult(energies, maxSteps)
+
+	for i := 0; i < img.Bounds().Dx()-width; i++ {
+		seam := getVerticalSeam(verticalDynamic, maxSteps) // Using vertical seam calculation
+		for j := 0; j < len(seam); j++ {
+			verticalDynamic[seam[j]][j] = math.Inf(1)
+		}
+		for k := 0; k < len(verticalDynamic[0])-1; k++ {
+			top, bottom := 0, 0
+			for bottom < len(verticalDynamic) {
+				if verticalDynamic[bottom][k] != math.Inf(1) {
+					tempDyn := verticalDynamic[bottom][k]
+					verticalDynamic[bottom][k] = verticalDynamic[top][k]
+					verticalDynamic[top][k] = tempDyn
+
+					tempResult := result.At(bottom, k)
+					result.Set(bottom, k, result.At(top, k))
+					result.Set(top, k, tempResult)
+
+					top++
+				}
+				bottom++
 			}
 		}
 	}
@@ -103,7 +129,7 @@ func getHorizontalSeam(dynamic [][]float64, maxStep int) []int {
 	return result
 }
 
-func getDynamicPrepResult(energies [][]float64, maxStep int) [][]float64 {
+func getHorizontalDynamicPrepResult(energies [][]float64, maxStep int) [][]float64 {
 	// creating 2-dimentional array filled with +Inf
 	dynamic := make([][]float64, len(energies))
 	for i := 0; i < len(dynamic); i++ {
@@ -121,6 +147,59 @@ func getDynamicPrepResult(energies [][]float64, maxStep int) [][]float64 {
 				min = math.Min(dynamic[i-1][int(math.Max(float64((j-maxStep+k)%(len(dynamic[i-1])-1)), 0))], min)
 			}
 			dynamic[i][j] = min + energies[i][j]
+		}
+	}
+
+	return dynamic
+}
+
+func getVerticalSeam(dynamic [][]float64, maxStep int) []int {
+	result := make([]int, len(dynamic[0]))
+	result[len(dynamic[0])-1] = func() int {
+		min, minIndex := math.Inf(1), 0
+		for i := 0; i < len(dynamic); i++ {
+			temp := dynamic[i][len(dynamic[0])-1]
+			if temp < min {
+				min = temp
+				minIndex = i
+			}
+		}
+		return minIndex
+	}()
+	for i := len(dynamic[0]) - 2; i >= 0; i-- {
+		minIndex, min := 0, math.Inf(1)
+		for k := 0; k < (maxStep*2 + 1); k++ {
+			tempIndex := int(math.Max(float64((result[i+1]-maxStep+k)%(len(dynamic)-1)), 0))
+			temp := dynamic[tempIndex][i]
+			if temp < min {
+				min = temp
+				minIndex = tempIndex
+			}
+		}
+		result[i] = minIndex
+	}
+
+	return result
+}
+
+func getVerticalDynamicPrepResult(energies [][]float64, maxStep int) [][]float64 {
+	// creating 2-dimensional array filled with +Inf
+	dynamic := make([][]float64, len(energies))
+	for i := 0; i < len(dynamic); i++ {
+		dynamic[i] = make([]float64, len(energies[0]))
+		for j := 0; j < len(dynamic[i]); j++ {
+			dynamic[i][j] = energies[i][j]
+		}
+	}
+
+	// using dynamic programming to get min cumulative energy for each point starting from left
+	for i := 1; i < len(dynamic[0]); i++ {
+		for j := 0; j < len(dynamic); j++ {
+			min := math.Inf(1)
+			for k := 0; k < (maxStep*2 + 1); k++ {
+				min = math.Min(dynamic[int(math.Max(float64((j-maxStep+k)%(len(dynamic)-1)), 0))][i-1], min)
+			}
+			dynamic[j][i] = min + energies[j][i]
 		}
 	}
 
