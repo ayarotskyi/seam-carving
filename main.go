@@ -12,7 +12,6 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("./static/")))
 	http.HandleFunc("/hello", L.Hello_handler)
 	http.HandleFunc("/image", L.Image_handler)
-	http.HandleFunc("/energy", L.Energy_handler)
 
 	port := os.Getenv("PORT")
 	if port == "" {

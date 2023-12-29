@@ -37,7 +37,11 @@ func Image_handler(w http.ResponseWriter, r *http.Request) {
 	for i := 0; i < originalWidth; i++ {
 		for j := 0; j < originalHeight; j++ {
 			colorMap[i][j] = img.At(i, j)
-			energies[i][j] = L.ComputeEnergy(img, i, j)
+		}
+	}
+	for i := 0; i < originalWidth; i++ {
+		for j := 0; j < originalHeight; j++ {
+			energies[i][j] = L.ComputeEnergy(colorMap, i, j)
 		}
 	}
 
