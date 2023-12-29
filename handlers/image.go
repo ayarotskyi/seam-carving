@@ -53,28 +53,28 @@ func Image_handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	horizontalDynamic := L.GetHorizontalDynamicPrepResult(energies, maxSteps)
+	horizontalAcummulativeMatrix := L.GetHorizontalAcummulativeMatrix(energies, maxSteps)
 
 	for i := 0; i < originalHeight-height; i++ {
-		for col, row := range L.GetHorizontalSeam(horizontalDynamic, maxSteps) {
-			removeFloat64AtIndex(horizontalDynamic[col], row)
+		for col, row := range L.GetHorizontalSeam(horizontalAcummulativeMatrix, maxSteps) {
+			removeFloat64AtIndex(horizontalAcummulativeMatrix[col], row)
 			removeColorAtIndex(colorMap[col], row)
 		}
 	}
 
-	verticalDynamic := L.GetVerticalDynamicPrepResult(energies, maxSteps)
+	verticalAcummulativeMatrix := L.GetVerticalAcummulativeMatrix(energies, maxSteps)
 
 	for i := 0; i < originalWidth-width; i++ {
-		for row, col := range L.GetVerticalSeam(verticalDynamic, maxSteps) {
-			verticalDynamic[col][row] = math.Inf(1)
+		for row, col := range L.GetVerticalSeam(verticalAcummulativeMatrix, maxSteps) {
+			verticalAcummulativeMatrix[col][row] = math.Inf(1)
 		}
-		for k := 0; k < len(verticalDynamic[0])-1; k++ {
+		for k := 0; k < len(verticalAcummulativeMatrix[0])-1; k++ {
 			top, bottom := 0, 0
-			for bottom < len(verticalDynamic) {
-				if verticalDynamic[bottom][k] != math.Inf(1) {
-					tempDyn := verticalDynamic[bottom][k]
-					verticalDynamic[bottom][k] = verticalDynamic[top][k]
-					verticalDynamic[top][k] = tempDyn
+			for bottom < len(verticalAcummulativeMatrix) {
+				if verticalAcummulativeMatrix[bottom][k] != math.Inf(1) {
+					tempDyn := verticalAcummulativeMatrix[bottom][k]
+					verticalAcummulativeMatrix[bottom][k] = verticalAcummulativeMatrix[top][k]
+					verticalAcummulativeMatrix[top][k] = tempDyn
 
 					tempResult := colorMap[bottom][k]
 					colorMap[bottom][k] = colorMap[top][k]

@@ -29,12 +29,12 @@ func GetImageFromRequest(r *http.Request) (image.Image, error) {
 	return img, nil
 }
 
-func GetHorizontalSeam(dynamic [][]float64, maxStep int) []int {
-	result := make([]int, len(dynamic))
-	result[len(dynamic)-1] = func() int {
+func GetHorizontalSeam(acummulativeMatrix [][]float64, maxStep int) []int {
+	result := make([]int, len(acummulativeMatrix))
+	result[len(acummulativeMatrix)-1] = func() int {
 		min, minIndex := math.Inf(1), 0
-		for i := 0; i < len(dynamic[len(dynamic)-1]); i++ {
-			temp := dynamic[len(dynamic)-1][i]
+		for i := 0; i < len(acummulativeMatrix[len(acummulativeMatrix)-1]); i++ {
+			temp := acummulativeMatrix[len(acummulativeMatrix)-1][i]
 			if temp < min {
 				min = temp
 				minIndex = i
@@ -42,15 +42,15 @@ func GetHorizontalSeam(dynamic [][]float64, maxStep int) []int {
 		}
 		return minIndex
 	}()
-	for i := len(dynamic) - 2; i >= 0; i-- {
+	for i := len(acummulativeMatrix) - 2; i >= 0; i-- {
 		minIndex, min := 0, math.Inf(1)
 		for k := 0; k < (maxStep*2 + 1); k++ {
 
-			tempIndex := (result[i+1] - maxStep + k) % (len(dynamic[i]) - 1)
+			tempIndex := (result[i+1] - maxStep + k) % (len(acummulativeMatrix[i]) - 1)
 			if tempIndex < 0 {
 				tempIndex = 0
 			}
-			temp := dynamic[i][tempIndex]
+			temp := acummulativeMatrix[i][tempIndex]
 			if temp < min {
 				min = temp
 				minIndex = tempIndex
@@ -62,11 +62,11 @@ func GetHorizontalSeam(dynamic [][]float64, maxStep int) []int {
 	return result
 }
 
-func GetHorizontalDynamicPrepResult(energies [][]float64, maxStep int) [][]float64 {
+func GetHorizontalAcummulativeMatrix(energies [][]float64, maxStep int) [][]float64 {
 	rows := len(energies)
 	cols := len(energies[0])
 
-	dynamic := energies
+	acummulativeMatrix := energies
 
 	for i := 1; i < rows; i++ {
 		for j := 0; j < cols; j++ {
@@ -78,21 +78,21 @@ func GetHorizontalDynamicPrepResult(energies [][]float64, maxStep int) [][]float
 				} else if index >= cols {
 					index = cols - 1
 				}
-				min = math.Min(dynamic[i-1][index], min)
+				min = math.Min(acummulativeMatrix[i-1][index], min)
 			}
-			dynamic[i][j] = min + energies[i][j]
+			acummulativeMatrix[i][j] = min + energies[i][j]
 		}
 	}
 
-	return dynamic
+	return acummulativeMatrix
 }
 
-func GetVerticalSeam(dynamic [][]float64, maxStep int) []int {
-	result := make([]int, len(dynamic[0]))
-	result[len(dynamic[0])-1] = func() int {
+func GetVerticalSeam(acummulativeMatrix [][]float64, maxStep int) []int {
+	result := make([]int, len(acummulativeMatrix[0]))
+	result[len(acummulativeMatrix[0])-1] = func() int {
 		min, minIndex := math.Inf(1), 0
-		for i := 0; i < len(dynamic); i++ {
-			temp := dynamic[i][len(dynamic[0])-1]
+		for i := 0; i < len(acummulativeMatrix); i++ {
+			temp := acummulativeMatrix[i][len(acummulativeMatrix[0])-1]
 			if temp < min {
 				min = temp
 				minIndex = i
@@ -100,14 +100,14 @@ func GetVerticalSeam(dynamic [][]float64, maxStep int) []int {
 		}
 		return minIndex
 	}()
-	for i := len(dynamic[0]) - 2; i >= 0; i-- {
+	for i := len(acummulativeMatrix[0]) - 2; i >= 0; i-- {
 		minIndex, min := 0, math.Inf(1)
 		for k := 0; k < (maxStep*2 + 1); k++ {
-			tempIndex := (result[i+1] - maxStep + k) % (len(dynamic) - 1)
+			tempIndex := (result[i+1] - maxStep + k) % (len(acummulativeMatrix) - 1)
 			if tempIndex < 0 {
 				tempIndex = 0
 			}
-			temp := dynamic[tempIndex][i]
+			temp := acummulativeMatrix[tempIndex][i]
 			if temp < min {
 				min = temp
 				minIndex = tempIndex
@@ -119,11 +119,11 @@ func GetVerticalSeam(dynamic [][]float64, maxStep int) []int {
 	return result
 }
 
-func GetVerticalDynamicPrepResult(energies [][]float64, maxStep int) [][]float64 {
+func GetVerticalAcummulativeMatrix(energies [][]float64, maxStep int) [][]float64 {
 	rows := len(energies)
 	cols := len(energies[0])
 
-	dynamic := energies
+	acummulativeMatrix := energies
 
 	for i := 1; i < cols; i++ {
 		for j := 0; j < rows; j++ {
@@ -139,15 +139,15 @@ func GetVerticalDynamicPrepResult(energies [][]float64, maxStep int) [][]float64
 			}
 
 			for k := start; k <= end; k++ {
-				if val := dynamic[k][i-1]; val < min {
+				if val := acummulativeMatrix[k][i-1]; val < min {
 					min = val
 				}
 			}
-			dynamic[j][i] = min + energies[j][i]
+			acummulativeMatrix[j][i] = min + energies[j][i]
 		}
 	}
 
-	return dynamic
+	return acummulativeMatrix
 }
 
 func CreateImageFromColorMap(colors [][]color.Color, width int, height int) image.Image {
