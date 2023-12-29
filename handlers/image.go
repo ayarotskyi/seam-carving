@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"image"
+	"image/color"
 	"image/png"
 	"math"
 	"net/http"
@@ -15,6 +15,7 @@ func Image_handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error decoding image: "+err.Error(), http.StatusBadRequest)
 		return
 	}
+	originalHeight, originalWidth := img.Bounds().Dy(), img.Bounds().Dx()
 	width, err := strconv.Atoi(r.FormValue("width"))
 	if err != nil {
 		http.Error(w, "Invalid width value", http.StatusBadRequest)
@@ -24,15 +25,18 @@ func Image_handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid height value", http.StatusBadRequest)
 	}
 
-	energies := make([][]float64, img.Bounds().Dx())
+	energies := make([][]float64, originalWidth)
 	for i := range energies {
-		energies[i] = make([]float64, img.Bounds().Dy())
+		energies[i] = make([]float64, originalHeight)
 	}
 
-	result := image.NewRGBA(img.Bounds())
-	for i := 0; i < len(energies); i++ {
-		for j := 0; j < len(energies[0]); j++ {
-			result.Set(i, j, img.At(i, j))
+	colorMap := make([][]color.Color, originalWidth)
+	for i := 0; i < originalWidth; i++ {
+		colorMap[i] = make([]color.Color, originalHeight)
+	}
+	for i := 0; i < originalWidth; i++ {
+		for j := 0; j < originalHeight; j++ {
+			colorMap[i][j] = img.At(i, j)
 			energies[i][j] = L.ComputeEnergy(img, i, j)
 		}
 	}
@@ -44,36 +48,18 @@ func Image_handler(w http.ResponseWriter, r *http.Request) {
 
 	horizontalDynamic := L.GetHorizontalDynamicPrepResult(energies, maxSteps)
 
-	for i := 0; i < img.Bounds().Dy()-height; i++ {
-		seam := L.GetHorizontalSeam(horizontalDynamic, maxSteps)
-		for j := 0; j < len(seam); j++ {
-			horizontalDynamic[j][seam[j]] = math.Inf(1)
-		}
-		for k := 0; k < len(horizontalDynamic)-1; k++ {
-			left, right := 0, 0
-			for right < len(horizontalDynamic[k]) {
-				if horizontalDynamic[k][right] != math.Inf(1) {
-					tempDyn := horizontalDynamic[k][right]
-					horizontalDynamic[k][right] = horizontalDynamic[k][left]
-					horizontalDynamic[k][left] = tempDyn
-
-					tempResult := result.At(k, right)
-					result.Set(k, right, result.At(k, left))
-					result.Set(k, left, tempResult)
-
-					left++
-				}
-				right++
-			}
+	for i := 0; i < originalHeight-height; i++ {
+		for col, row := range L.GetHorizontalSeam(horizontalDynamic, maxSteps) {
+			removeFloat64AtIndex(horizontalDynamic[col], row)
+			removeColorAtIndex(colorMap[col], row)
 		}
 	}
 
 	verticalDynamic := L.GetVerticalDynamicPrepResult(energies, maxSteps)
 
-	for i := 0; i < img.Bounds().Dx()-width; i++ {
-		seam := L.GetVerticalSeam(verticalDynamic, maxSteps) // Using vertical seam calculation
-		for j := 0; j < len(seam); j++ {
-			verticalDynamic[seam[j]][j] = math.Inf(1)
+	for i := 0; i < originalWidth-width; i++ {
+		for row, col := range L.GetVerticalSeam(verticalDynamic, maxSteps) {
+			verticalDynamic[col][row] = math.Inf(1)
 		}
 		for k := 0; k < len(verticalDynamic[0])-1; k++ {
 			top, bottom := 0, 0
@@ -83,9 +69,9 @@ func Image_handler(w http.ResponseWriter, r *http.Request) {
 					verticalDynamic[bottom][k] = verticalDynamic[top][k]
 					verticalDynamic[top][k] = tempDyn
 
-					tempResult := result.At(bottom, k)
-					result.Set(bottom, k, result.At(top, k))
-					result.Set(top, k, tempResult)
+					tempResult := colorMap[bottom][k]
+					colorMap[bottom][k] = colorMap[top][k]
+					colorMap[top][k] = tempResult
 
 					top++
 				}
@@ -96,5 +82,12 @@ func Image_handler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/octet-stream")
-	png.Encode(w, result.SubImage(image.Rectangle{Min: image.Pt(0, 0), Max: image.Pt(width, height)}))
+	png.Encode(w, L.CreateImageFromColorMap(colorMap, width, height))
+}
+
+func removeFloat64AtIndex(s []float64, index int) []float64 {
+	return append(s[:index], s[index+1:]...)
+}
+func removeColorAtIndex(s []color.Color, index int) []color.Color {
+	return append(s[:index], s[index+1:]...)
 }

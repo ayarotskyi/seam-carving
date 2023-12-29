@@ -2,6 +2,7 @@ package utils
 
 import (
 	"image"
+	"image/color"
 	_ "image/jpeg"
 	_ "image/png"
 	"math"
@@ -62,23 +63,20 @@ func GetHorizontalSeam(dynamic [][]float64, maxStep int) []int {
 }
 
 func GetHorizontalDynamicPrepResult(energies [][]float64, maxStep int) [][]float64 {
-	// creating 2-dimentional array filled with +Inf
-	dynamic := make([][]float64, len(energies))
-	for i := 0; i < len(dynamic); i++ {
-		dynamic[i] = make([]float64, len(energies[0]))
-		for j := 0; j < len(dynamic[i]); j++ {
-			dynamic[i][j] = energies[i][j]
-		}
-	}
+	rows := len(energies)
+	cols := len(energies[0])
 
-	// using dynamic programming to get min cumulative energy for each point starting from top
-	for i := 1; i < len(dynamic); i++ {
-		for j := 0; j < len(dynamic[i]); j++ {
+	dynamic := energies
+
+	for i := 1; i < rows; i++ {
+		for j := 0; j < cols; j++ {
 			min := math.Inf(1)
-			for k := 0; k < (maxStep*2 + 1); k++ {
-				index := (j - maxStep + k) % (len(dynamic[i-1]) - 1)
+			for k := -maxStep; k <= maxStep; k++ {
+				index := j + k
 				if index < 0 {
 					index = 0
+				} else if index >= cols {
+					index = cols - 1
 				}
 				min = math.Min(dynamic[i-1][index], min)
 			}
@@ -122,29 +120,52 @@ func GetVerticalSeam(dynamic [][]float64, maxStep int) []int {
 }
 
 func GetVerticalDynamicPrepResult(energies [][]float64, maxStep int) [][]float64 {
-	// creating 2-dimensional array filled with +Inf
-	dynamic := make([][]float64, len(energies))
-	for i := 0; i < len(dynamic); i++ {
-		dynamic[i] = make([]float64, len(energies[0]))
-		for j := 0; j < len(dynamic[i]); j++ {
-			dynamic[i][j] = energies[i][j]
-		}
-	}
+	rows := len(energies)
+	cols := len(energies[0])
 
-	// using dynamic programming to get min cumulative energy for each point starting from left
-	for i := 1; i < len(dynamic[0]); i++ {
-		for j := 0; j < len(dynamic); j++ {
+	dynamic := energies
+
+	for i := 1; i < cols; i++ {
+		for j := 0; j < rows; j++ {
 			min := math.Inf(1)
-			for k := 0; k < (maxStep*2 + 1); k++ {
-				index := (j - maxStep + k) % (len(dynamic) - 1)
-				if index < 0 {
-					index = 0
+			start := j - maxStep
+			end := j + maxStep
+
+			if start < 0 {
+				start = 0
+			}
+			if end >= rows {
+				end = rows - 1
+			}
+
+			for k := start; k <= end; k++ {
+				if val := dynamic[k][i-1]; val < min {
+					min = val
 				}
-				min = math.Min(dynamic[index][i-1], min)
 			}
 			dynamic[j][i] = min + energies[j][i]
 		}
 	}
 
 	return dynamic
+}
+
+func CreateImageFromColorMap(colors [][]color.Color, width int, height int) image.Image {
+	if width > len(colors) {
+		width = len(colors)
+	}
+	if height > len(colors[0]) {
+		height = len(colors[0])
+	}
+	// Create an RGBA image
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+
+	// Iterate through the colors and set them in the image
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			img.Set(x, y, colors[x][y])
+		}
+	}
+
+	return img
 }
