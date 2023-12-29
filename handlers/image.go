@@ -45,6 +45,13 @@ func Image_handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		maxSteps = 1
 	}
+	if maxSteps > originalHeight || maxSteps > originalWidth {
+		if originalHeight > originalWidth {
+			maxSteps = originalHeight
+		} else {
+			maxSteps = originalWidth
+		}
+	}
 
 	horizontalDynamic := L.GetHorizontalDynamicPrepResult(energies, maxSteps)
 
