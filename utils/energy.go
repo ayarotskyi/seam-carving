@@ -2,10 +2,9 @@ package utils
 
 import (
 	"image/color"
-	"math"
 )
 
-func ComputeEnergy(colorMap [][]color.Color, x int, y int) float64 {
+func ComputeEnergy(colorMap [][]color.Color, x int, y int) uint32 {
 	width := len(colorMap)
 	height := len(colorMap[0])
 
@@ -22,7 +21,7 @@ func ComputeEnergy(colorMap [][]color.Color, x int, y int) float64 {
 		return x + 1
 	}()][y].RGBA()
 
-	deltaX := math.Pow((float64)(rx1-rx0), 2) + math.Pow((float64)(gx1-gx0), 2) + math.Pow((float64)(bx1-bx0), 2)
+	deltaX := (rx1 - rx0) ^ 2 + (gx1 - gx0) ^ 2 + (bx1 - bx0) ^ 2
 
 	ry0, gy0, by0, _ := colorMap[x][func() int {
 		if y == 0 {
@@ -37,7 +36,7 @@ func ComputeEnergy(colorMap [][]color.Color, x int, y int) float64 {
 		return y + 1
 	}()].RGBA()
 
-	deltaY := math.Pow((float64)(ry1-ry0), 2) + math.Pow((float64)(gy1-gy0), 2) + math.Pow((float64)(by1-by0), 2)
+	deltaY := (ry1 - ry0) ^ 2 + (gy1 - gy0) ^ 2 + (by1 - by0) ^ 2
 
 	return deltaX + deltaY
 }

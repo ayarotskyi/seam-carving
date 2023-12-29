@@ -29,10 +29,10 @@ func GetImageFromRequest(r *http.Request) (image.Image, error) {
 	return img, nil
 }
 
-func GetHorizontalSeam(acummulativeMatrix [][]float64, maxStep int) []int {
+func GetHorizontalSeam(acummulativeMatrix [][]uint32, maxStep int) []int {
 	result := make([]int, len(acummulativeMatrix))
 	result[len(acummulativeMatrix)-1] = func() int {
-		min, minIndex := math.Inf(1), 0
+		min, minIndex := uint32(math.Inf(1)), 0
 		for i := 0; i < len(acummulativeMatrix[len(acummulativeMatrix)-1]); i++ {
 			temp := acummulativeMatrix[len(acummulativeMatrix)-1][i]
 			if temp < min {
@@ -43,7 +43,7 @@ func GetHorizontalSeam(acummulativeMatrix [][]float64, maxStep int) []int {
 		return minIndex
 	}()
 	for i := len(acummulativeMatrix) - 2; i >= 0; i-- {
-		minIndex, min := 0, math.Inf(1)
+		minIndex, min := 0, uint32(math.Inf(1))
 		for k := 0; k < (maxStep*2 + 1); k++ {
 
 			tempIndex := (result[i+1] - maxStep + k) % (len(acummulativeMatrix[i]) - 1)
@@ -62,7 +62,7 @@ func GetHorizontalSeam(acummulativeMatrix [][]float64, maxStep int) []int {
 	return result
 }
 
-func GetHorizontalAcummulativeMatrix(energies [][]float64, maxStep int) [][]float64 {
+func GetHorizontalAcummulativeMatrix(energies [][]uint32, maxStep int) [][]uint32 {
 	rows := len(energies)
 	cols := len(energies[0])
 
@@ -70,7 +70,7 @@ func GetHorizontalAcummulativeMatrix(energies [][]float64, maxStep int) [][]floa
 
 	for i := 1; i < rows; i++ {
 		for j := 0; j < cols; j++ {
-			min := math.Inf(1)
+			min := uint32(math.Inf(1))
 			for k := -maxStep; k <= maxStep; k++ {
 				index := j + k
 				if index < 0 {
@@ -78,7 +78,10 @@ func GetHorizontalAcummulativeMatrix(energies [][]float64, maxStep int) [][]floa
 				} else if index >= cols {
 					index = cols - 1
 				}
-				min = math.Min(acummulativeMatrix[i-1][index], min)
+				nextVal := acummulativeMatrix[i-1][index]
+				if nextVal < min {
+					min = nextVal
+				}
 			}
 			acummulativeMatrix[i][j] = min + energies[i][j]
 		}
@@ -87,10 +90,10 @@ func GetHorizontalAcummulativeMatrix(energies [][]float64, maxStep int) [][]floa
 	return acummulativeMatrix
 }
 
-func GetVerticalSeam(acummulativeMatrix [][]float64, maxStep int) []int {
+func GetVerticalSeam(acummulativeMatrix [][]uint32, maxStep int) []int {
 	result := make([]int, len(acummulativeMatrix[0]))
 	result[len(acummulativeMatrix[0])-1] = func() int {
-		min, minIndex := math.Inf(1), 0
+		min, minIndex := uint32(math.Inf(1)), 0
 		for i := 0; i < len(acummulativeMatrix); i++ {
 			temp := acummulativeMatrix[i][len(acummulativeMatrix[0])-1]
 			if temp < min {
@@ -101,7 +104,7 @@ func GetVerticalSeam(acummulativeMatrix [][]float64, maxStep int) []int {
 		return minIndex
 	}()
 	for i := len(acummulativeMatrix[0]) - 2; i >= 0; i-- {
-		minIndex, min := 0, math.Inf(1)
+		minIndex, min := 0, uint32(math.Inf(1))
 		for k := 0; k < (maxStep*2 + 1); k++ {
 			tempIndex := (result[i+1] - maxStep + k) % (len(acummulativeMatrix) - 1)
 			if tempIndex < 0 {
@@ -119,7 +122,7 @@ func GetVerticalSeam(acummulativeMatrix [][]float64, maxStep int) []int {
 	return result
 }
 
-func GetVerticalAcummulativeMatrix(energies [][]float64, maxStep int) [][]float64 {
+func GetVerticalAcummulativeMatrix(energies [][]uint32, maxStep int) [][]uint32 {
 	rows := len(energies)
 	cols := len(energies[0])
 
@@ -127,7 +130,7 @@ func GetVerticalAcummulativeMatrix(energies [][]float64, maxStep int) [][]float6
 
 	for i := 1; i < cols; i++ {
 		for j := 0; j < rows; j++ {
-			min := math.Inf(1)
+			min := uint32(math.Inf(1))
 			start := j - maxStep
 			end := j + maxStep
 
