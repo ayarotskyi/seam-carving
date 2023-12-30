@@ -1,12 +1,12 @@
 window.addEventListener("load", () => {
   let img;
-  let dropbox = document.getElementById("dropbox");
-  dropbox.addEventListener("dragenter", dragenter, false);
-  dropbox.addEventListener("dragover", dragover, false);
-  dropbox.addEventListener("drop", drop, false);
-  let preview = document.getElementById("preview");
+  const dropbox = document.getElementById("dropbox");
+  document.body.addEventListener("dragenter", dragenter, false);
+  document.body.addEventListener("dragover", dragover, false);
+  document.body.addEventListener("drop", drop, false);
+  const preview = document.getElementById("preview");
 
-  let form = document.querySelector("form");
+  const form = document.querySelector("form");
   form.addEventListener("formdata", (e) => {
     const formData = e.formData;
 
